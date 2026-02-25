@@ -8,7 +8,7 @@
 - Structured feedback output
 ## Tech Stack
 - Python
-- spaCy (or NLTK)
+- spaCy
 - Pandas
 - Matplotlib (optional, for visualizations)
 ## How It Works
