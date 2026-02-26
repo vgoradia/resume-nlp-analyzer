@@ -1,7 +1,7 @@
 # resume-nlp-analyzer
 A Python NLP-based analysis tool that examines writing quality, structure, and linguistic patterns to provide actionable insights on text effectiveness.
 ## Features
-- Readability scoring
+- Readability Scoring
 - Word Count and Common Verbs Analysis
 - Sentence Length and Count Analysis
 - Keyword and Common Words Evaluation
