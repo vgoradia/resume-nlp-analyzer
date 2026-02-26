@@ -2,10 +2,10 @@
 A Python NLP-based analysis tool that examines writing quality, structure, and linguistic patterns to provide actionable insights on text effectiveness.
 ## Features
 - Readability scoring
-- Sentence length distribution analysis
-- Repetition detection
-- Keyword alignment evaluation
-- Structured feedback output
+- Word Count and Common Verbs Analysis
+- Sentence Length and Count Analysis
+- Keyword and Common Words Evaluation
+- Named Entities Analysis
 ## Tech Stack
 - Python
 - spaCy
