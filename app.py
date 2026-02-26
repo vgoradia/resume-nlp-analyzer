@@ -12,7 +12,9 @@ def analyze(text: str) -> dict:
     doc = nlp(text)
 
     # Sentences
-    sentences = list(doc.sents)
+    text_for_sentences = " ".join(line.strip() for line in text.splitlines() if line.strip())
+    doc_sentences = nlp(text_for_sentences)
+    sentences = list(doc_sentences.sents)
 
     # "Content words" (alpha, non-stop)
     content_words = [t.text.lower() for t in doc if t.is_alpha and not t.is_stop]
@@ -69,17 +71,17 @@ def analyze(text: str) -> dict:
     # Simple feedback rules
     feedback = []
     if avg_sentence_length > 22:
-        feedback.append("Your sentences are long — try tighter bullet-style phrasing.")
+        feedback.append("Your sentences are long, opt for tighter bullet-style phrasing.")
     if bullet_count < 3 and len(lines) > 6:
         feedback.append("Consider using more bullet points for readability.")
     if action_verb_density < 3:
-        feedback.append("Action verbs are a bit low — start bullets with strong verbs (built, led, shipped, improved).")
+        feedback.append("Action verbs are a bit low, make sure to start bullets with strong verbs (built, led, shipped, improved).")
     if len(weak_verb_hits) >= 3:
-        feedback.append("You’re using several weak verbs (help/work/learn). Swap for stronger verbs where possible.")
+        feedback.append("You’re using several weak verbs. Swap for stronger verbs where possible.")
     if flesch < 20:
-        feedback.append("Readability is very dense — shorten sentences and reduce filler words.")
+        feedback.append("Readability is very dense, try to shorten sentences and reduce filler words.")
     if not feedback:
-        feedback.append("Overall structure looks solid — refine with stronger verbs + impact metrics (%, $, time saved).")
+        feedback.append("Overall structure looks solid, but refine with stronger verbs + impact metrics (%, $, time saved).")
 
     return {
         # Raw counts
