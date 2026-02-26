@@ -10,7 +10,6 @@
 - Python
 - spaCy
 - Pandas
-- Matplotlib (optional, for visualizations)
 ## How It Works
 The system processes raw text input and extracts linguistic features such as sentence length, word frequency, and keyword relevance. These metrics are compiled into a structured analysis report.
 ## Future Improvements
