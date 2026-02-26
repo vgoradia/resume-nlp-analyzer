@@ -1,5 +1,5 @@
 # resume-nlp-analyzer
-- a Python-based natural language processing tool that evaluates resumes and essays for clarity, structure, and readability. It analyzes sentence patterns, repetition, and keyword alignment to generate objective, data-driven feedback.
+A Python NLP-based analysis tool that examines writing quality, structure, and linguistic patterns to provide actionable insights on text effectiveness.
 ## Features
 - Readability scoring
 - Sentence length distribution analysis
