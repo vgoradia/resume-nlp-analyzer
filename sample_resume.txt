@@ -1,9 +1,29 @@
-The Power of Small Habits
+Name: John Doe
+Email: john.doe@email.com
 
-People often believe that success comes from dramatic changes or once-in-a-lifetime decisions, but in reality, it is built through small habits practiced consistently. A habit may seem insignificant on its own—waking up ten minutes earlier, reading a few pages a day, or choosing water over soda—but over time, these actions compound into meaningful change.
+Location: Boston, MA
 
-Small habits work because they are sustainable. Large goals can feel overwhelming and lead to burnout, while small actions feel manageable and achievable. When a habit becomes part of daily life, it no longer requires motivation; it runs on routine. This consistency is what allows progress to occur quietly in the background.
+SUMMARY
+Computer science student interested in data analysis and natural language processing. Strong in Python and comfortable working with text data, basic machine learning models, and statistical concepts.
 
-Additionally, small habits shape identity. A person who writes a paragraph every day begins to see themselves as a writer. Someone who exercises lightly but regularly starts to identify as an active person. These identity shifts reinforce the habit, creating a positive feedback loop.
+EDUCATION
+B.S. in Computer Science
+Northeastern University
+Expected Graduation: 2027
+GPA: 3.7
 
-Ultimately, the power of small habits lies in their simplicity. They remind us that growth does not require perfection or intensity, only patience and persistence. Over time, small actions accumulate, turning ordinary days into extraordinary outcomes.
+SKILLS
+Python, SQL
+pandas, NumPy, scikit-learn, spaCy
+Data cleaning, text preprocessing, basic NLP
+
+PROJECTS
+Resume Analysis Tool
+Built a Python NLP tool to analyze resume clarity and keyword relevance using tokenization and TF-IDF.
+
+Sentiment Analysis Project
+Classified product reviews using logistic regression and visualized results.
+
+EXPERIENCE
+Data Analytics Intern
+Analyzed datasets using Python and assisted with reporting tasks.
