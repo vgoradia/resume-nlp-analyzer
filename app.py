@@ -3,6 +3,8 @@ import spacy
 import textstat
 from collections import Counter
 import re
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
 # Load spaCy model once
 nlp = spacy.load("en_core_web_sm")
@@ -16,13 +18,13 @@ def analyze(text: str) -> dict:
     doc_sentences = nlp(text_for_sentences)
     sentences = list(doc_sentences.sents)
 
-    # "Content words" (alpha, non-stop)
+    # "Content words" 
     content_words = [t.text.lower() for t in doc if t.is_alpha and not t.is_stop]
 
-    # All alphabetic words (includes stopwords) for some metrics
+    # All alphabetic words 
     all_words = [t.text.lower() for t in doc if t.is_alpha]
 
-    # Average sentence length (words per sentence)
+    # Average sentence length 
     avg_sentence_length = (
         sum(len(s.text.split()) for s in sentences) / len(sentences)
         if sentences else 0
@@ -32,11 +34,11 @@ def analyze(text: str) -> dict:
     flesch = textstat.flesch_reading_ease(text)
     grade = textstat.flesch_kincaid_grade(text)
 
-    # Named entities (top 10)
+    # Named entities
     entities = [(ent.text.strip().replace("\n", " "), ent.label_) for ent in doc.ents][:10]
 
-    # Action verbs (filtered)
-    bad_verbs = {"resume"}  # spaCy sometimes tags "resume" as VERB; not helpful here
+    # Action verbs 
+    bad_verbs = {"resume"} 
     action_verbs = [
         t.lemma_.lower() for t in doc
         if t.pos_ == "VERB"
@@ -45,13 +47,13 @@ def analyze(text: str) -> dict:
         and t.lemma_.lower() not in bad_verbs
     ]
 
-    # Weak verbs list (customizable)
+    # Weak verbs list 
     weak_verbs_set = {
         "help", "work", "learn", "do", "make", "use", "try", "assist", "handle", "support"
     }
     weak_verb_hits = [v for v in action_verbs if v in weak_verbs_set]
 
-    # Bullet detection (lines that start with -, *, •)
+    # Bullet detection
     lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
     bullet_lines = [ln for ln in lines if re.match(r"^(\-|\*|•)\s+", ln)]
     bullet_count = len(bullet_lines)
@@ -62,7 +64,7 @@ def analyze(text: str) -> dict:
     unique_word_pct = (len(set(all_words)) / total_words_all * 100) if total_words_all else 0
     action_verb_density = (len(action_verbs) / total_words_all * 100) if total_words_all else 0
 
-    # Common words (content words only)
+    # Common words 
     common_words = Counter(content_words).most_common(8)
 
     # Top action verbs
@@ -108,7 +110,19 @@ def analyze(text: str) -> dict:
         # Feedback
         "Feedback": feedback
     }
+def match_job_description(resume_text: str, job_text: str) -> dict:
+    vectorizer = TfidfVectorizer(stop_words="english")
+    tfidf = vectorizer.fit_transform([resume_text, job_text])
+    score = cosine_similarity(tfidf[0], tfidf[1])[0][0] * 100
 
+    resume_words = set(resume_text.lower().split())
+    job_words = set(job_text.lower().split())
+    missing = [w for w in job_words - resume_words if w.isalpha() and len(w) > 3]
+
+    return {
+        "Match Score": round(score, 2),
+        "Missing Keywords": missing[:15]
+    }
 
 st.set_page_config(page_title="Resume NLP Analyzer", page_icon="📄", layout="wide")
 
@@ -116,14 +130,14 @@ st.title("📄 Resume NLP Analyzer")
 st.write("Paste your resume below and get quick NLP-based insights + readability + action-verb strength.")
 
 text_input = st.text_area("Resume Text", height=320, placeholder="Paste resume text here...")
-
+job_input = st.text_area("Job Description (optional)", height=200, placeholder="Paste your desired job description here to get a match score")
 if st.button("Analyze"):
     if text_input.strip():
         report = analyze(text_input)
 
         st.subheader("Results")
 
-        # Metrics row
+        # Metrics
         c1, c2, c3, c4, c5, c6 = st.columns(6)
         c1.metric("Words (All)", report["Total Words (All)"])
         c2.metric("Words (Content)", report["Total Words (Content)"])
@@ -132,7 +146,7 @@ if st.button("Analyze"):
         c5.metric("Flesch", report["Readability (Flesch)"])
         c6.metric("Grade Level", report["Grade Level"])
 
-        # Signals row
+        # Signals
         s1, s2, s3 = st.columns(3)
         s1.metric("Unique Word %", report["Unique Word %"])
         s2.metric("Action Verb Density %", report["Action Verb Density %"])
@@ -141,6 +155,17 @@ if st.button("Analyze"):
         st.markdown("### Feedback")
         for tip in report["Feedback"]:
             st.write(f"✅ {tip}")
+
+        if job_input.strip():
+            st.markdown("### Job Description Match")
+            match = match_job_description(text_input, job_input)
+            col1, col2 = st.columns(2)
+            col1.metric("Match Score", f"{match['Match Score']}%")
+            st.markdown("**Missing Keywords:**")
+            if match["Missing Keywords"]:
+                st.write(", ".join(match["Missing Keywords"]))
+            else:
+                st.write("None ✅")
 
         left, right = st.columns(2)
 
