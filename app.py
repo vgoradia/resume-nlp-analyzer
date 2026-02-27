@@ -129,7 +129,14 @@ st.set_page_config(page_title="Resume NLP Analyzer", page_icon="📄", layout="w
 st.title("📄 Resume NLP Analyzer")
 st.write("Paste your resume below and get quick NLP-based insights + readability + action-verb strength.")
 
-text_input = st.text_area("Resume Text", height=320, placeholder="Paste resume text here...")
+upload = st.file_uploader("Upload Resume PDF (Optional)", type=["pdf"])
+text_input = st.text_area("Resume Text", height=320, placeholder="Paste resume text here.")
+
+if upload is not None:
+    import fitz
+    with fitz.open(stream=upload.read(), filetype="pdf") as pdf:
+        text_input = "\n".join(page.get_text() for page in pdf)
+    st.success("PDF has loaded successfully.")
 job_input = st.text_area("Job Description (optional)", height=200, placeholder="Paste your desired job description here to get a match score")
 if st.button("Analyze"):
     if text_input.strip():
