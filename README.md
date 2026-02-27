@@ -11,7 +11,7 @@ A web-based NLP tool that analyzes resume text for readability, action verb stre
 ## Tech Stack
 - Python
 - spaCy
-- Scikit
+- Scikit-learn
 - Streamlit
 ## How It Works
 The system processes raw text input and extracts linguistic features such as sentence length, word frequency, and keywords. These metrics are compiled into a structured analysis report.
