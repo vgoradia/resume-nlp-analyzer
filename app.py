@@ -168,6 +168,28 @@ def calculate_score(report: dict) -> int:
 
 st.set_page_config(page_title="Resume NLP Analyzer", page_icon="📄", layout="wide")
 
+st.markdown("""
+    <style>
+    .block-container { padding-top: 2rem; }
+    .score-box {
+        background: linear-gradient(135deg, #1e3a5f, #0d6efd);
+        border-radius: 16px;
+        padding: 2rem;
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+    .score-number {
+        font-size: 4rem;
+        font-weight: 800;
+        color: white;
+    }
+    .score-label {
+        font-size: 1.1rem;
+        color: #a0c4ff;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 st.title("📄 Resume NLP Analyzer")
 st.write("Paste your resume below and get quick NLP-based insights + readability + action-verb strength.")
 
@@ -180,9 +202,19 @@ if upload is not None:
         text_input = "\n".join(page.get_text() for page in pdf)
     st.success("PDF has loaded successfully.")
 job_input = st.text_area("Job Description (optional)", height=200, placeholder="Paste your desired job description here to get a match score")
-if st.button("Analyze"):
+if st.button("🔍 Analyze", use_container_width=True):
     if text_input.strip():
         report = analyze(text_input)
+        
+        resume_score = calculate_score(report)
+        color = "#28a745" if resume_score >= 70 else "#ffc107" if resume_score >= 45 else "#dc3545"
+        st.markdown(f"""
+            <div class="score-box" style="background: linear-gradient(135deg, #1a1a2e, {color});">
+                <div class="score-number">{resume_score}<span style="font-size:2rem">/100</span></div>
+                <div class="score-label">Overall Resume Score</div>
+            </div>
+        """, unsafe_allow_html=True)
+        st.progress(resume_score / 100)
 
         st.subheader("Results")
 
@@ -203,13 +235,14 @@ if st.button("Analyze"):
 
         st.markdown("### Feedback")
         for tip in report["Feedback"]:
-            st.write(f"✅ {tip}")
+            st.write(f"💡 {tip}")
 
         if job_input.strip():
             st.markdown("### Job Description Match")
             match = match_job_description(text_input, job_input)
             col1, col2 = st.columns(2)
             col1.metric("Match Score", f"{match['Match Score']}%")
+            st.progress(match["Match Score"] / 100)
             st.markdown("**Missing Keywords:**")
             if match["Missing Keywords"]:
                 st.write(", ".join(match["Missing Keywords"]))
