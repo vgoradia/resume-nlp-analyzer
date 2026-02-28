@@ -11,6 +11,7 @@ A web-based NLP tool that analyzes resume text for readability, action verb stre
 ## Tech Stack
 - Python
 - spaCy
+- Textstat
 - Scikit-learn
 - PyMuPDF
 - Streamlit
