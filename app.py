@@ -141,21 +141,21 @@ def calculate_score(report: dict) -> int:
     elif report["Bullet Count"] >= 3:
         score += 6
     
-    if report["Readability Score - Flesch"] >= 40:
+    if report["Readability (Flesch)"] >= 40:
         score += 20
-    elif report["Readability Score - Flesch"] >= 25:
+    elif report["Readability (Flesch)"] >= 25:
         score += 12
-    elif report["Readability Score - Flesch"] >= 15:
+    elif report["Readability (Flesch)"] >= 15:
         score += 6
     
-    if report["% Of Unique Words"] >= 70:
+    if report["Unique Word %"] >= 70:
         score += 20
-    elif report["% Of Unique Words"] >= 55:
+    elif report["Unique Word %"] >= 55:
         score += 12
-    elif report["% Of Unique Words"] >= 40:
+    elif report["Unique Word %"] >= 40:
         score += 6
     
-    weak_count = len(report["Weak Verbs"])
+    weak_count = len(report["Weak Verb Hits"])
     if weak_count == 0:
         score += 15
     elif weak_count == 1:
