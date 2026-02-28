@@ -124,6 +124,48 @@ def match_job_description(resume_text: str, job_text: str) -> dict:
         "Missing Keywords": missing[:15]
     }
 
+def calculate_score(report: dict) -> int:
+    score = 0
+
+    if report["Action Verb Density %"] >= 8:
+        score += 25
+    elif report["Action Verb Density %"] >= 5:
+        score += 15
+    elif report["Action Verb Density %"] >= 3:
+        score += 10
+    
+    if report["Bullet Count"] >= 8:
+        score += 20
+    elif report["Bullet Count"] >= 5:
+        score += 12
+    elif report["Bullet Count"] >= 3:
+        score += 6
+    
+    if report["Readability Score - Flesch"] >= 40:
+        score += 20
+    elif report["Readability Score - Flesch"] >= 25:
+        score += 12
+    elif report["Readability Score - Flesch"] >= 15:
+        score += 6
+    
+    if report["% Of Unique Words"] >= 70:
+        score += 20
+    elif report["% Of Unique Words"] >= 55:
+        score += 12
+    elif report["% Of Unique Words"] >= 40:
+        score += 6
+    
+    weak_count = len(report["Weak Verbs"])
+    if weak_count == 0:
+        score += 15
+    elif weak_count == 1:
+        score += 10
+    elif weak_count == 2:
+        score += 5
+    
+    return min(score, 100)
+
+
 st.set_page_config(page_title="Resume NLP Analyzer", page_icon="📄", layout="wide")
 
 st.title("📄 Resume NLP Analyzer")
