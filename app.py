@@ -179,7 +179,73 @@ def calculate_score(report: dict) -> int:
     
     return min(score, 100)
 
+from fpdf import FPDF
+def sanitize(text: str) -> str:
+    """Replace common Unicode characters with ASCII equivalents for Helvetica compatibility."""
+    replacements = {
+        "\u2018": "'", "\u2019": "'",   # curly single quotes
+        "\u201c": '"', "\u201d": '"',   # curly double quotes
+        "\u2013": "-", "\u2014": "-",   # en/em dashes
+        "\u2026": "...",                # ellipsis
+        "\u00e9": "e", "\u00e8": "e",  # accented e
+        "\u00e0": "a", "\u00e2": "a",  # accented a
+    }
+    for orig, repl in replacements.items():
+        text = text.replace(orig, repl)
+    # Fallback: replace anything else still unsupported
+    return text.encode("latin-1", errors="replace").decode("latin-1")
 
+def generate_pdf(report: dict, score: int) -> bytes:
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_auto_page_break(auto=True, margin=15)
+    w = pdf.w - 2 * pdf.l_margin
+    pdf.set_font("Helvetica", "B", 20)
+    pdf.cell(0, 10, "Resume NLP Analyzer Report", ln=True, align="C")
+    pdf.ln(5)
+
+    pdf.set_font("Helvetica", "B", 14)
+    pdf.cell(0, 10, f"Overall Score: {score} / 100", ln=True)
+    pdf.ln(3)
+
+    pdf.set_font("Helvetica", "B", 12)
+    pdf.cell(0, 8, "Metrics", ln=True)
+    pdf.set_font("Helvetica", size=11)
+    pdf.cell(0, 7, f"Total Words: {report['Total Words (All)']}", ln=True)
+    pdf.cell(0, 7, f"Total Sentences: {report['Total Sentences']}", ln=True)
+    pdf.cell(0, 7, f"Avg Sentence Length: {report['Average Sentence Length']}", ln=True)
+    pdf.cell(0, 7, f"Readability (Flesch): {report['Readability (Flesch)']}", ln=True)
+    pdf.cell(0, 7, f"Grade Level: {report['Grade Level']}", ln=True)
+    pdf.cell(0, 7, f"Unique Word %: {report['Unique Word %']}", ln=True)
+    pdf.cell(0, 7, f"Action Verb Density %: {report['Action Verb Density %']}", ln=True)
+    pdf.cell(0, 7, f"Bullet Count: {report['Bullet Count']}", ln=True)
+    pdf.ln(3)
+
+    pdf.set_font("Helvetica", "B", 12)
+    pdf.cell(0, 8, "Feedback", ln=True)
+    pdf.set_font("Helvetica", size=11)
+    for tip in report["Feedback"]:
+        pdf.multi_cell(w, 7, sanitize(f"- {tip}"))
+    pdf.ln(3)
+
+    pdf.set_font("Helvetica", "B", 12)
+    pdf.cell(0, 8, "Top Action Verbs", ln=True)
+    pdf.set_font("Helvetica", size=11)
+    for verb, count in report["Top Action Verbs"]:
+        pdf.cell(0, 7, sanitize(f"- {verb}: {count}"), ln=True)
+    pdf.ln(3)
+
+    pdf.set_font("Helvetica", "B", 12)
+    pdf.cell(0, 8, "Weak Verb Hits", ln=True)
+    pdf.set_font("Helvetica", size=11)
+    if report["Weak Verb Hits"]:
+        for verb, suggestions in report["Weak Verb Hits"]:
+            pdf.multi_cell(w, 7, sanitize(f"- {verb} -> try: {', '.join(suggestions)}"))
+    else:
+        pdf.cell(0, 7, "None detected", ln=True)
+
+    return bytes(pdf.output())
+    
 st.set_page_config(page_title="Resume NLP Analyzer", page_icon="📄", layout="wide")
 
 st.markdown("""
@@ -231,6 +297,13 @@ with tab1:
                 </div>
             """, unsafe_allow_html=True)
             st.progress(resume_score / 100)
+            pdf_bytes = generate_pdf(report, resume_score)
+            st.download_button(
+                label="Download Report as a PDF",
+                data=pdf_bytes,
+                file_name="resume_report.pdf",
+                mime="application/pdf"
+            )
 
             st.subheader("Results")
 
