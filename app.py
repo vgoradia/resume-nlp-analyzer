@@ -325,6 +325,7 @@ with tab2:
                 st.metric("Action Verb Density %", report1["Action Verb Density %"])
                 st.metric("Bullet Count", report1["Bullet Count"])
                 st.metric("Readability (Flesch)", report1["Readability (Flesch)"])
+                st.caption("Scores below 0 indicate very dense text.")
                 st.metric("Unique Word %", report1["Unique Word %"])
 
             with r2:
@@ -333,6 +334,7 @@ with tab2:
                 st.metric("Action Verb Density %", report2["Action Verb Density %"])
                 st.metric("Bullet Count", report2["Bullet Count"])
                 st.metric("Readability (Flesch)", report2["Readability (Flesch)"])
+                st.caption("Scores below 0 indicate very dense text.")
                 st.metric("Unique Word %", report2["Unique Word %"])
 
             st.markdown("### 🏆 Winner")
