@@ -206,90 +206,147 @@ st.markdown("""
 
 st.title("📄 Resume NLP Analyzer")
 st.write("Paste your resume below and get quick NLP-based insights + readability + action-verb strength.")
+tab1, tab2 = st.tabs(["Single Resume", "Compare Resumes"])
 
-upload = st.file_uploader("Upload Resume PDF (Optional)", type=["pdf"])
-text_input = st.text_area("Resume Text", height=320, placeholder="Paste resume text here.")
+with tab1:
+    upload = st.file_uploader("Upload Resume PDF (Optional)", type=["pdf"])
+    text_input = st.text_area("Resume Text", height=320, placeholder="Paste resume text here.")
 
-if upload is not None:
-    import fitz
-    with fitz.open(stream=upload.read(), filetype="pdf") as pdf:
-        text_input = "\n".join(page.get_text() for page in pdf)
-    st.success("PDF has loaded successfully.")
-job_input = st.text_area("Job Description (optional)", height=200, placeholder="Paste your desired job description here to get a match score")
-if st.button("🔍 Analyze", use_container_width=True):
-    if text_input.strip():
-        report = analyze(text_input)
-        
-        resume_score = calculate_score(report)
-        color = "#28a745" if resume_score >= 70 else "#ffc107" if resume_score >= 45 else "#dc3545"
-        st.markdown(f"""
-            <div class="score-box" style="background: linear-gradient(135deg, #1a1a2e, {color});">
-                <div class="score-number">{resume_score}<span style="font-size:2rem">/100</span></div>
-                <div class="score-label">Overall Resume Score</div>
-            </div>
-        """, unsafe_allow_html=True)
-        st.progress(resume_score / 100)
+    if upload is not None:
+        import fitz
+        with fitz.open(stream=upload.read(), filetype="pdf") as pdf:
+            text_input = "\n".join(page.get_text() for page in pdf)
+        st.success("PDF has loaded successfully.")
+    job_input = st.text_area("Job Description (optional)", height=200, placeholder="Paste your desired job description here to get a match score")
+    if st.button("🔍 Analyze", use_container_width=True):
+        if text_input.strip():
+            report = analyze(text_input)
+            
+            resume_score = calculate_score(report)
+            color = "#28a745" if resume_score >= 70 else "#ffc107" if resume_score >= 45 else "#dc3545"
+            st.markdown(f"""
+                <div class="score-box" style="background: linear-gradient(135deg, #1a1a2e, {color});">
+                    <div class="score-number">{resume_score}<span style="font-size:2rem">/100</span></div>
+                    <div class="score-label">Overall Resume Score</div>
+                </div>
+            """, unsafe_allow_html=True)
+            st.progress(resume_score / 100)
 
-        st.subheader("Results")
+            st.subheader("Results")
 
-        # Metrics
-        c1, c2, c3, c4, c5, c6 = st.columns(6)
-        c1.metric("Words (All)", report["Total Words (All)"])
-        c2.metric("Words (Content)", report["Total Words (Content)"])
-        c3.metric("Sentences", report["Total Sentences"])
-        c4.metric("Avg Sentence Len", report["Average Sentence Length"])
-        c5.metric("Flesch", report["Readability (Flesch)"])
-        c6.metric("Grade Level", report["Grade Level"])
+            # Metrics
+            c1, c2, c3, c4, c5, c6 = st.columns(6)
+            c1.metric("Words (All)", report["Total Words (All)"])
+            c2.metric("Words (Content)", report["Total Words (Content)"])
+            c3.metric("Sentences", report["Total Sentences"])
+            c4.metric("Avg Sentence Len", report["Average Sentence Length"])
+            c5.metric("Flesch", report["Readability (Flesch)"])
+            c6.metric("Grade Level", report["Grade Level"])
 
-        # Signals
-        s1, s2, s3 = st.columns(3)
-        s1.metric("Unique Word %", report["Unique Word %"])
-        s2.metric("Action Verb Density %", report["Action Verb Density %"])
-        s3.metric("Bullet Count", report["Bullet Count"])
+            # Signals
+            s1, s2, s3 = st.columns(3)
+            s1.metric("Unique Word %", report["Unique Word %"])
+            s2.metric("Action Verb Density %", report["Action Verb Density %"])
+            s3.metric("Bullet Count", report["Bullet Count"])
 
-        st.markdown("### Feedback")
-        for tip in report["Feedback"]:
-            st.write(f"💡 {tip}")
+            st.markdown("### Feedback")
+            for tip in report["Feedback"]:
+                st.write(f"💡 {tip}")
 
-        if job_input.strip():
-            st.markdown("### Job Description Match")
-            match = match_job_description(text_input, job_input)
-            col1, col2 = st.columns(2)
-            col1.metric("Match Score", f"{match['Match Score']}%")
-            st.progress(match["Match Score"] / 100)
-            st.markdown("**Missing Keywords:**")
-            if match["Missing Keywords"]:
-                st.write(", ".join(match["Missing Keywords"]))
+            if job_input.strip():
+                st.markdown("### Job Description Match")
+                match = match_job_description(text_input, job_input)
+                col1, col2 = st.columns(2)
+                col1.metric("Match Score", f"{match['Match Score']}%")
+                st.progress(match["Match Score"] / 100)
+                st.markdown("**Missing Keywords:**")
+                if match["Missing Keywords"]:
+                    st.write(", ".join(match["Missing Keywords"]))
+                else:
+                    st.write("None ✅")
+
+            left, right = st.columns(2)
+
+            with left:
+                st.markdown("### Most Common Words (Content)")
+                import plotly.express as px
+                import pandas as pd
+                word_df = pd.DataFrame(report["Most Common Words"], columns=["Word", "Count"])
+                fig = px.bar(word_df, x="Count", y="Word", orientation="h")
+                st.plotly_chart(fig, use_container_width=True)
+
+                st.markdown("### Top Action Verbs")
+                st.table([{"Verb": v, "Count": c} for v, c in report["Top Action Verbs"]])
+
+                st.markdown("### Weak Verb Hits")
+                weak_hits = report["Weak Verb Hits"]
+                if weak_hits:
+                    for verb, suggestions in weak_hits:
+                        st.markdown(f"**{verb}** -> try instead: {', '.join(suggestions)}")
+                else:
+                    st.write("None detected ✅")
+
+            with right:
+                st.markdown("### Named Entities (Top 10)")
+                st.table([{"Entity": t, "Label": l} for t, l in report["Named Entities"]])
+
+                with st.expander("Show raw report JSON"):
+                    st.json(report)
+
+        else:
+            st.warning("Paste text first to analyze.")
+with tab2:
+    st.markdown("### Compare Two Texts")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.markdown("**Resume 1**")
+        text1 = st.text_area("Resume 1 Text", height=300, placeholder="Paste first resume here...", key="compare_resume1")
+
+    with col2:
+        st.markdown("**Resume 2**")
+        text2 = st.text_area("Resume 2 Text", height=300, placeholder="Paste second resume here...", key="compare_resume2")
+
+    if st.button("⚖️ Compare", use_container_width=True):
+        if text1.strip() and text2.strip():
+            report1 = analyze(text1)
+            report2 = analyze(text2)
+            score1 = calculate_score(report1)
+            score2 = calculate_score(report2)
+
+            st.markdown("### Results")
+
+            r1, r2 = st.columns(2)
+
+            with r1:
+                st.markdown("#### Resume 1")
+                st.metric("Overall Score", f"{score1} / 100")
+                st.metric("Action Verb Density %", report1["Action Verb Density %"])
+                st.metric("Bullet Count", report1["Bullet Count"])
+                st.metric("Readability (Flesch)", report1["Readability (Flesch)"])
+                st.metric("Unique Word %", report1["Unique Word %"])
+
+            with r2:
+                st.markdown("#### Resume 2")
+                st.metric("Overall Score", f"{score2} / 100")
+                st.metric("Action Verb Density %", report2["Action Verb Density %"])
+                st.metric("Bullet Count", report2["Bullet Count"])
+                st.metric("Readability (Flesch)", report2["Readability (Flesch)"])
+                st.metric("Unique Word %", report2["Unique Word %"])
+
+            st.markdown("### 🏆 Winner")
+            if score1 > score2:
+                st.success("Resume 1 is stronger.")
+            elif score2 > score1:
+                st.success("Resume 2 is stronger.")
             else:
-                st.write("None ✅")
+                st.info("Its a tie.")
+        else:
+            st.warning("Paste both resumes to compare.")
 
-        left, right = st.columns(2)
+            
+            
 
-        with left:
-            st.markdown("### Most Common Words (Content)")
-            import plotly.express as px
-            import pandas as pd
-            word_df = pd.DataFrame(report["Most Common Words"], columns=["Word", "Count"])
-            fig = px.bar(word_df, x="Count", y="Word", orientation="h")
-            st.plotly_chart(fig, use_container_width=True)
 
-            st.markdown("### Top Action Verbs")
-            st.table([{"Verb": v, "Count": c} for v, c in report["Top Action Verbs"]])
 
-            st.markdown("### Weak Verb Hits")
-            weak_hits = report["Weak Verb Hits"]
-            if weak_hits:
-                for verb, suggestions in weak_hits:
-                    st.markdown(f"**{verb}** -> try instead: {', '.join(suggestions)}")
-            else:
-                st.write("None detected ✅")
-
-        with right:
-            st.markdown("### Named Entities (Top 10)")
-            st.table([{"Entity": t, "Label": l} for t, l in report["Named Entities"]])
-
-            with st.expander("Show raw report JSON"):
-                st.json(report)
-
-    else:
-        st.warning("Paste text first to analyze.")
