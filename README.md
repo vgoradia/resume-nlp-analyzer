@@ -2,7 +2,7 @@
 
 A web-based NLP tool that analyzes resume text for readability, action verb strength, keyword frequency, and named entities.
 
-🔗 **Live Demo:** [resume-nlp-analyzer.streamlit.app](https://resume-nlp-analyzer.streamlit.app)
+🔗 **Project Link:** [resume-nlp-analyzer.streamlit.app](https://resume-nlp-analyzer.streamlit.app)
 ---
 ## Features
 
