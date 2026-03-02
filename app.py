@@ -267,7 +267,11 @@ if st.button("🔍 Analyze", use_container_width=True):
 
         with left:
             st.markdown("### Most Common Words (Content)")
-            st.table([{"Word": w, "Count": c} for w, c in report["Most Common Words"]])
+            import plotly.express as px
+            import pandas as pd
+            word_df = pd.DataFrame(report["Most Common Words"], columns=["Word", "Count"])
+            fig = px.bar(word_df, x="Count", y="Word", orientation="h")
+            st.plotly_chart(fig, use_container_width=True)
 
             st.markdown("### Top Action Verbs")
             st.table([{"Verb": v, "Count": c} for v, c in report["Top Action Verbs"]])
