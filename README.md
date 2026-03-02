@@ -45,5 +45,3 @@ resume-nlp-analyzer/
 └── README.md
 ```
 ---
-
-Built by Veer Goradia
