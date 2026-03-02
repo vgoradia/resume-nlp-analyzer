@@ -8,7 +8,7 @@ A web-based NLP tool that analyzes resume text for readability, action verb stre
 - Sentence Length and Count Analysis
 - Keyword and Common Words Evaluation
 - Named Entities Analysis
-## Tech Stack
+## Everything Used
 - Python
 - spaCy
 - Textstat
