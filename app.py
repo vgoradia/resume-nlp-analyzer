@@ -51,7 +51,21 @@ def analyze(text: str) -> dict:
     weak_verbs_set = {
         "help", "work", "learn", "do", "make", "use", "try", "assist", "handle", "support"
     }
-    weak_verb_hits = [v for v in action_verbs if v in weak_verbs_set]
+
+    weak_verb_replacements = {
+    "help": ["support", "enable", "facilitate"],
+    "work": ["execute", "drive", "deliver"],
+    "learn": ["mastered", "acquired", "developed"],
+    "do": ["execute", "implement", "complete"],
+    "make": ["build", "create", "develop"],
+    "use": ["leverage", "utilize", "implement"],
+    "try": ["pursue", "implement", "execute"],
+    "assist": ["led", "drove", "spearheaded"],
+    "handle": ["managed", "oversaw", "directed"],
+    "support": ["enabled", "accelerated", "strengthened"]
+    }
+
+    weak_verb_hits = [(v, weak_verb_replacements.get(v, [])) for v in set(action_verbs) if v in weak_verbs_set]
 
     # Bullet detection
     lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
@@ -100,7 +114,7 @@ def analyze(text: str) -> dict:
         "Unique Word %": round(unique_word_pct, 2),
         "Action Verb Density %": round(action_verb_density, 2),
         "Bullet Count": bullet_count,
-        "Weak Verb Hits": Counter(weak_verb_hits).most_common(8),
+        "Weak Verb Hits": [(v, weak_verb_replacements.get(v,[])) for v in set(action_verbs) if v in weak_verbs_set],
 
         # Lists
         "Most Common Words": common_words,
@@ -261,7 +275,8 @@ if st.button("🔍 Analyze", use_container_width=True):
             st.markdown("### Weak Verb Hits")
             weak_hits = report["Weak Verb Hits"]
             if weak_hits:
-                st.table([{"Verb": v, "Count": c} for v, c in weak_hits])
+                for verb, suggestions in weak_hits:
+                    st.markdown(f"**{verb}** -> try instead: {', '.join(suggestions)}")
             else:
                 st.write("None detected ✅")
 
